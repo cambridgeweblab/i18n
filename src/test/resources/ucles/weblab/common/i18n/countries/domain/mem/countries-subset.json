@@ -1,0 +1,234 @@
+[
+  {
+    "name": "Australia",
+    "capital": "Canberra",
+    "altSpellings": [
+      "AU"
+    ],
+    "relevance": "1.5",
+    "region": "Oceania",
+    "subregion": "Australia and New Zealand",
+    "translations": {
+      "de": "Australien",
+      "es": "Australia",
+      "fr": "Australie",
+      "ja": "オーストラリア",
+      "it": "Australia"
+    },
+    "population": 23696900,
+    "latlng": [
+      -27,
+      133
+    ],
+    "demonym": "Australian",
+    "area": 7692024,
+    "gini": 30.5,
+    "timezones": [
+      "UTC+05:00",
+      "UTC+06:30",
+      "UTC+07:00",
+      "UTC+08:00",
+      "UTC+09:30",
+      "UTC+10:00",
+      "UTC+10:30",
+      "UTC+11:30"
+    ],
+    "borders": [],
+    "nativeName": "Australia",
+    "callingCodes": [
+      "61"
+    ],
+    "topLevelDomain": [
+      ".au"
+    ],
+    "alpha2Code": "AU",
+    "alpha3Code": "AUS",
+    "currencies": [
+      "AUD"
+    ],
+    "languages": [
+      "en"
+    ]
+  },
+  {
+    "name": "Christmas Island",
+    "capital": "Flying Fish Cove",
+    "altSpellings": [
+      "CX",
+      "Territory of Christmas Island"
+    ],
+    "relevance": "0.5",
+    "region": "Oceania",
+    "subregion": "Australia and New Zealand",
+    "translations": {
+      "de": "Weihnachtsinsel",
+      "es": "Isla de Navidad",
+      "fr": "Île Christmas",
+      "ja": "クリスマス島",
+      "it": "Isola di Natale"
+    },
+    "population": 2072,
+    "latlng": [
+      -10.5,
+      105.66666666
+    ],
+    "demonym": "Christmas Island",
+    "area": 135,
+    "gini": null,
+    "timezones": null,
+    "borders": [],
+    "nativeName": "Christmas Island",
+    "callingCodes": [
+      "61"
+    ],
+    "topLevelDomain": [
+      ".cx"
+    ],
+    "alpha2Code": "CX",
+    "alpha3Code": "CXR",
+    "currencies": [
+      "AUD"
+    ],
+    "languages": [
+      "en"
+    ]
+  },
+  {
+    "name": "Cocos (Keeling) Islands",
+    "capital": "West Island",
+    "altSpellings": [
+      "CC",
+      "Territory of the Cocos (Keeling) Islands",
+      "Keeling Islands"
+    ],
+    "relevance": "0",
+    "region": "Oceania",
+    "subregion": "Australia and New Zealand",
+    "translations": {
+      "de": "Kokosinseln",
+      "es": "Islas Cocos o Islas Keeling",
+      "fr": "Îles Cocos",
+      "ja": "ココス（キーリング）諸島",
+      "it": "Isole Cocos e Keeling"
+    },
+    "population": 550,
+    "latlng": [
+      -12.5,
+      96.83333333
+    ],
+    "demonym": "Cocos Islander",
+    "area": 14,
+    "gini": null,
+    "timezones": null,
+    "borders": [],
+    "nativeName": "Cocos (Keeling) Islands",
+    "callingCodes": [
+      "61"
+    ],
+    "topLevelDomain": [
+      ".cc"
+    ],
+    "alpha2Code": "CC",
+    "alpha3Code": "CCK",
+    "currencies": [
+      "AUD"
+    ],
+    "languages": [
+      "en"
+    ]
+  },
+  {
+    "name": "New Zealand",
+    "capital": "Wellington",
+    "altSpellings": [
+      "NZ",
+      "Aotearoa"
+    ],
+    "relevance": "1.0",
+    "region": "Oceania",
+    "subregion": "Australia and New Zealand",
+    "translations": {
+      "de": "Neuseeland",
+      "es": "Nueva Zelanda",
+      "fr": "Nouvelle-Zélande",
+      "ja": "ニュージーランド",
+      "it": "Nuova Zelanda"
+    },
+    "population": 4547900,
+    "latlng": [
+      -41,
+      174
+    ],
+    "demonym": "New Zealander",
+    "area": 270467,
+    "gini": 36.2,
+    "timezones": [
+      "UTC−11:00",
+      "UTC−10:00",
+      "UTC+12:00",
+      "UTC+12:45",
+      "UTC+13:00"
+    ],
+    "borders": [],
+    "nativeName": "New Zealand",
+    "callingCodes": [
+      "64"
+    ],
+    "topLevelDomain": [
+      ".nz"
+    ],
+    "alpha2Code": "NZ",
+    "alpha3Code": "NZL",
+    "currencies": [
+      "NZD"
+    ],
+    "languages": [
+      "en",
+      "mi"
+    ]
+  },
+  {
+    "name": "Norfolk Island",
+    "capital": "Kingston",
+    "altSpellings": [
+      "NF",
+      "Territory of Norfolk Island",
+      "Teratri of Norf'k Ailen"
+    ],
+    "relevance": "0.5",
+    "region": "Oceania",
+    "subregion": "Australia and New Zealand",
+    "translations": {
+      "de": "Norfolkinsel",
+      "es": "Isla de Norfolk",
+      "fr": "Île de Norfolk",
+      "ja": "ノーフォーク島",
+      "it": "Isola Norfolk"
+    },
+    "population": 2302,
+    "latlng": [
+      -29.03333333,
+      167.95
+    ],
+    "demonym": "Norfolk Islander",
+    "area": 36,
+    "gini": null,
+    "timezones": null,
+    "borders": [],
+    "nativeName": "Norfolk Island",
+    "callingCodes": [
+      "672"
+    ],
+    "topLevelDomain": [
+      ".nf"
+    ],
+    "alpha2Code": "NF",
+    "alpha3Code": "NFK",
+    "currencies": [
+      "AUD"
+    ],
+    "languages": [
+      "en"
+    ]
+  }
+]
