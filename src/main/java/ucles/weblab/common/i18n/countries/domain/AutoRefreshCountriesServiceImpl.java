@@ -20,7 +20,7 @@ import java.util.concurrent.Future;
  *
  * @since 18/05/15
  */
-public class AutoRefreshCountriesServiceImpl implements CountriesService {
+public class AutoRefreshCountriesServiceImpl implements CountriesService, ScheduledRefresh {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final URI countriesUri;

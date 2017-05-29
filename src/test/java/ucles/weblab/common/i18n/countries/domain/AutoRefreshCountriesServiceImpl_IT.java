@@ -99,22 +99,14 @@ public class AutoRefreshCountriesServiceImpl_IT {
         String[] isoCountries = Locale.getISOCountries();
         JSONArray readResult;
         for (String isoCountry : isoCountries) {
-            if (isoCountry.equals("AN") || isoCountry.equals("AQ") || isoCountry.equals("VA") || isoCountry.equals("VI")) {
+            if (isoCountry.equals("AN") || isoCountry.equals("AQ")) {
                 // AN: Old code for Netherlands Antilles, not present in data set. See http://en.wikipedia.org/wiki/ISO_3166-2:AN
                 // AQ: Antarctica, noone lives there (honest).
-                // VA: Holy See. This is a bug, to my mind.
-                // VI: US Virign Islands. This is a bug, to my mind.
                 continue;
             }
             readResult = readContext.read("$[?(@.alpha2Code == '" + isoCountry + "')]");
             assertEquals("Expect to parse the results as JSON and find the country: " + isoCountry, 1,
                     readResult.size());
         }
-        readResult = readContext.read("$[?(@.alpha2Code == 'VA')]");
-        assertEquals("Hooray, REST Countries has been fixed to return the Holy See (VA) - update this test!", 0,
-                readResult.size());
-        readResult = readContext.read("$[?(@.alpha2Code == 'VI')]");
-        assertEquals("Hooray, REST Countries has been fixed to return the US Virgin Islands (VI) - update this test!", 0,
-                readResult.size());
     }
 }
