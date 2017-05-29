@@ -1,17 +1,29 @@
 package ucles.weblab.common.i18n.countries.domain;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.jsonSchema.factories.JsonSchemaFactory;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
 import net.minidev.json.JSONArray;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
+import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import ucles.weblab.common.i18n.countries.config.CountriesConfig;
+import ucles.weblab.common.schema.webapi.EnumSchemaCreator;
+import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
+import ucles.weblab.common.security.SecurityChecker;
+import ucles.weblab.common.xc.service.CrossContextConversionService;
+import ucles.weblab.common.xc.service.CrossContextConversionServiceImpl;
 
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -30,7 +42,50 @@ import static org.junit.Assert.assertNotNull;
 public class AutoRefreshCountriesServiceImpl_IT {
     @Configuration
     @Import({CountriesConfig.class, PropertyPlaceholderAutoConfiguration.class})
-    public static class Config {}
+    public static class Config {
+        @Bean
+        @ConditionalOnMissingBean(MethodSecurityExpressionHandler.class)
+        MethodSecurityExpressionHandler methodSecurityExpressionHandler() {
+            return new DefaultMethodSecurityExpressionHandler();
+        }
+
+        @Bean
+        SecurityChecker securityChecker(MethodSecurityExpressionHandler handler) {
+            return new SecurityChecker(handler);
+        }
+
+        @Bean
+        CrossContextConversionService crossContextConversionService() {
+            return new CrossContextConversionServiceImpl();
+        }
+
+        @Bean
+        EnumSchemaCreator enumSchemaCreator(final JsonSchemaFactory schemaFactory) {
+            return new EnumSchemaCreator();
+        }
+
+        @Bean
+        JsonSchemaFactory jsonSchemaFactory() {
+            return new JsonSchemaFactory();
+        }
+
+        @Bean
+        public ResourceSchemaCreator resourceSchemaCreator(SecurityChecker securityChecker,
+                                                           CrossContextConversionService crossContextConversionService,
+                                                           EnumSchemaCreator enumSchemaCreator,
+                                                           JsonSchemaFactory jsonSchemaFactory,
+                                                           MessageSource messageSource) {
+
+            return new ResourceSchemaCreator(securityChecker,
+                    new ObjectMapper(),
+                    crossContextConversionService,
+                    enumSchemaCreator,
+                    jsonSchemaFactory,
+                    messageSource);
+        }
+
+
+    }
 
     @Autowired
     private CountriesService countriesService;
