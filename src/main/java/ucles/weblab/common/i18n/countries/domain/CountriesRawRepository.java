@@ -1,5 +1,6 @@
 package ucles.weblab.common.i18n.countries.domain;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -28,5 +29,13 @@ public interface CountriesRawRepository {
      * @return 
      */
     Optional<? extends CountryEntity> findOneByAlpha2Code(String countryCode);
+
+    /**
+     * Fetches a list of countries by searching for the country name - search is case insensitive and unicode enabled,
+     * and supports up to one language in addition to English.
+     *
+     * @param languageCode  defaults to English, will search within the country translations for the provided language code in addition to the English name
+     */
+    List<? extends CountryEntity> findByNameContaining(String countrySearchString, String languageCode);
 
 }

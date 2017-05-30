@@ -2,6 +2,8 @@ package ucles.weblab.common.i18n.countries.domain.mem;
 
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ucles.weblab.common.i18n.countries.domain.CountriesRawRepository;
 import ucles.weblab.common.i18n.countries.domain.CountryEntity;
 import ucles.weblab.common.i18n.countries.domain.CountryRepository;
@@ -13,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 import static com.jayway.jsonpath.Configuration.defaultConfiguration;
 import static com.jayway.jsonpath.Criteria.where;
@@ -25,6 +28,7 @@ import static java.util.stream.Collectors.toList;
  * @since 18/05/15
  */
 public class CountriesDualRepositoryMem implements CountriesRawRepository, CountryRepository {
+    private final Logger log = LoggerFactory.getLogger(CountriesDualRepositoryMem.class);
     private final Function<Object, CountryEntity> jsonObjectToCountryEntity;
 
     public CountriesDualRepositoryMem(Supplier<CountryEntity.Builder> countryEntityBuilder) {
@@ -81,5 +85,34 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
                 .orElse(Collections.emptyList()).stream()
                 .findFirst()
                 .map(jsonObjectToCountryEntity);
+    }
+
+    @Override
+    public List<? extends CountryEntity> findByNameContaining(String countrySearchString, String languageCode) {
+        boolean englishOnly = ( languageCode == null || languageCode.equals("en") );
+
+        Pattern searchStringContains = Pattern.compile(".*" + regexSafeQuote(countrySearchString) + ".*", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+
+        if(englishOnly) {
+            return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(where("name").regex(searchStringContains))))
+                    .orElse(Collections.emptyList()).stream()
+                    .map(jsonObjectToCountryEntity)
+                    .collect(toList());
+        } else {
+
+            return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(where("name").regex(searchStringContains)).or(where("translations." + languageCode).regex(searchStringContains))))
+                    .orElse(Collections.emptyList()).stream()
+                    .map(jsonObjectToCountryEntity)
+                    .collect(toList());
+        }
+    }
+
+    private String regexSafeQuote(String s) {
+        s = s.trim();
+        if(s.contains("\\E")) {
+            log.warn("Encountered an end quote special character in a field using regex \"" + s + "\", continuing and treating it as an 'E'");
+            s = s.replace("\\E", "E");
+        }
+        return "\\Q" + s + "\\E";
     }
 }
