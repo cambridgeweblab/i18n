@@ -9,7 +9,6 @@ import ucles.weblab.common.i18n.countries.domain.CountryEntity;
 import ucles.weblab.common.i18n.countries.domain.CountryRepository;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,6 +19,7 @@ import java.util.regex.Pattern;
 import static com.jayway.jsonpath.Configuration.defaultConfiguration;
 import static com.jayway.jsonpath.Criteria.where;
 import static com.jayway.jsonpath.Filter.filter;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -58,7 +58,7 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
     @Override
     public Optional<? extends CountryEntity> findOneByName(String name) {
         return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(where("name").eq(name))))
-                .orElse(Collections.emptyList()).stream()
+                .orElse(emptyList()).stream()
                 .findFirst()
                 .map(jsonObjectToCountryEntity);
     }
@@ -66,7 +66,7 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
     @Override
     public List<? extends CountryEntity> findAll() {
         return getReadContext().map(readContext -> (List<Object>) readContext.json())
-                .orElse(Collections.emptyList()).stream()
+                .orElse(emptyList()).stream()
                 .map(jsonObjectToCountryEntity)
                 .collect(toList());
     }
@@ -82,7 +82,7 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
     public Optional<? extends CountryEntity> findOneByAlpha2Code(String countryCode) {
 
         return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(where("alpha2Code").eq(countryCode))))
-                .orElse(Collections.emptyList()).stream()
+                .orElse(emptyList()).stream()
                 .findFirst()
                 .map(jsonObjectToCountryEntity);
     }
@@ -95,13 +95,15 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
 
         if(englishOnly) {
             return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(where("name").regex(searchStringContains))))
-                    .orElse(Collections.emptyList()).stream()
+                    .orElse(emptyList()).stream()
                     .map(jsonObjectToCountryEntity)
                     .collect(toList());
         } else {
 
-            return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(where("name").regex(searchStringContains)).or(where("translations." + languageCode).regex(searchStringContains))))
-                    .orElse(Collections.emptyList()).stream()
+            return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(
+                        where("name").regex(searchStringContains))
+                        .or(where("translations." + languageCode).regex(searchStringContains))))
+                    .orElse(emptyList()).stream()
                     .map(jsonObjectToCountryEntity)
                     .collect(toList());
         }
