@@ -1,5 +1,6 @@
 package ucles.weblab.common.i18n.countries.domain.mem;
 
+import com.jayway.jsonpath.Filter;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.ReadContext;
 import org.slf4j.Logger;
@@ -89,11 +90,9 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
 
     @Override
     public List<? extends CountryEntity> findByNameContaining(String countrySearchString, String languageCode) {
-        boolean englishOnly = ( languageCode == null || languageCode.equals("en") );
-
         Pattern searchStringContains = Pattern.compile(".*" + regexSafeQuote(countrySearchString) + ".*", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
-        if(englishOnly) {
+        if(isEnglish(languageCode)) {
             return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(where("name").regex(searchStringContains))))
                     .orElse(emptyList()).stream()
                     .map(jsonObjectToCountryEntity)
@@ -107,6 +106,22 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
                     .map(jsonObjectToCountryEntity)
                     .collect(toList());
         }
+    }
+
+    @Override
+    public Optional<String> getCodeByNameAndLocale(String countryName, String languageCode) {
+        /*  There is currently no english translation, so the name attribute needs to be searched if the
+            language code is english, otherwise the appropriate translations are searched */
+        Filter filter = ( isEnglish(languageCode) ) ? filter(where("name").eq(countryName)) : filter(where("translations." + languageCode).eq(countryName));
+
+        return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter))
+                .orElse(emptyList()).stream()
+                .findFirst()
+                .map( o -> ((Map<String, String>) o).get("alpha2Code").toString() );
+    }
+
+    private static boolean isEnglish(String languageCode) {
+        return languageCode == null || languageCode.equals("en");
     }
 
     private String regexSafeQuote(String s) {

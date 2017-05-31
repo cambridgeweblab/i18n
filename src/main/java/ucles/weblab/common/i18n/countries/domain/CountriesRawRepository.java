@@ -38,4 +38,10 @@ public interface CountriesRawRepository {
      */
     List<? extends CountryEntity> findByNameContaining(String countrySearchString, String languageCode);
 
+    /**
+     * Fetches the alpha2Code for a country by the country name and the language the country name is in.
+     * @param languageCode  defaults to English, defines which language the country name is in (e.g. Australien is Australia in german (language code DE))
+     */
+    Optional<String> getCodeByNameAndLocale(String countryName, String languageCode);
+
 }

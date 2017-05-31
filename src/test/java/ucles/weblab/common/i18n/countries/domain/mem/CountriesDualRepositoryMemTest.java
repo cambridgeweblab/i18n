@@ -89,6 +89,20 @@ public class CountriesDualRepositoryMemTest {
         confirmContainsCountries("z\\E", null, "New Zealand"); //Edge case
     }
 
+    @Test
+    public void testGetCodeByNameAndLocale() throws Exception {
+        loadCountries();
+
+        //Test it works in English
+        assertEquals("AU", countriesDualRepository.getCodeByNameAndLocale("Australia", "en").get());
+        assertEquals("AU", countriesDualRepository.getCodeByNameAndLocale("Australia", null).get());
+        //Test it works in an alternative language
+        assertEquals("AU", countriesDualRepository.getCodeByNameAndLocale("Australien", "de").get());
+        //Test nothing returns when the country name or language code is incorrect
+        assertFalse(countriesDualRepository.getCodeByNameAndLocale("Australien", "pp").isPresent());
+        assertFalse(countriesDualRepository.getCodeByNameAndLocale("Australie", "de").isPresent());
+    }
+
     /*
         Provides asserts to testFindNamesByNameContaining - pulls the countries out of the repo by searchString and languageCode,
         then matches them against the provided array of country names
