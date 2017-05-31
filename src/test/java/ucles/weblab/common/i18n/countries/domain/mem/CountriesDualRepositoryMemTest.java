@@ -71,22 +71,27 @@ public class CountriesDualRepositoryMemTest {
     }
 
     @Test
-    public void testFindNamesByNameContaining() throws Exception {
+    public void testFindByNameContaining() throws Exception {
         loadCountries();
 
-        confirmContainsCountries("AUS", null, "Australia"); //Test ignores case
-        confirmContainsCountries("isl", "en", "Christmas Island", "Cocos (Keeling) Islands", "Norfolk Island"); //Test multiple results
-        confirmContainsCountries("NUEva", "es", "New Zealand"); //Test other languages
-        confirmContainsCountries("ーランド", "ja", "New Zealand"); //Test other characters
-        confirmContainsCountries("Zeal", "ja", "New Zealand"); //Still returns with the English when a non English language code is provided as current users are used to using English
-        confirmContainsCountries("Zeal", "biscuit", "New Zealand"); //Still returns with the English for unsupported languages
+        confirmContainsCountries("AUS", null, "AU"); //Test ignores case
+        confirmContainsCountries("isl", "en", "CX", "CC", "NF"); //Test multiple results
+        confirmContainsCountries("NUEva", "es", "NZ"); //Test other languages
+        confirmContainsCountries("ーランド", "ja", "NZ"); //Test other characters
+        confirmContainsCountries("Zeal", "ja", "NZ"); //Still returns with the English when a non English language code is provided as current users are used to using English
+        confirmContainsCountries("Zeal", "biscuit", "NZ"); //Still returns with the English for unsupported languages
 
         assertTrue(countriesDualRepository.findByNameContaining("NUEva", "ja").isEmpty()); //Search is Spanish but language code is Japanese
         assertTrue(countriesDualRepository.findByNameContaining("AUSB", null).isEmpty()); //No matches
         assertTrue(countriesDualRepository.findByNameContaining(".*", null).isEmpty()); //Regex should not work as this would be a security risk
         assertTrue(countriesDualRepository.findByNameContaining("\\E.*", null).isEmpty()); //Including end quotes followed by other regex
 
-        confirmContainsCountries("z\\E", null, "New Zealand"); //Edge case
+        confirmContainsCountries("z\\E", null, "NZ"); //Edge case
+
+        //Confirm the name is returned in the correct language
+        assertEquals("Isla de Norfolk", countriesDualRepository.findByNameContaining("Norfolk", "es").get(0).getName());
+        assertEquals("Norfolk Island", countriesDualRepository.findByNameContaining("Norfolk", "en").get(0).getName());
+        assertEquals("Norfolkinsel", countriesDualRepository.findByNameContaining("Norfolk", "de").get(0).getName());
     }
 
     @Test
@@ -105,16 +110,16 @@ public class CountriesDualRepositoryMemTest {
 
     /*
         Provides asserts to testFindNamesByNameContaining - pulls the countries out of the repo by searchString and languageCode,
-        then matches them against the provided array of country names
+        then matches them against the provided array of country codes
     */
-    private void confirmContainsCountries(String searchString, String languageCode, String... expectedResultNames) {
+    private void confirmContainsCountries(String searchString, String languageCode, String... expectedCodes) {
         List<? extends CountryEntity> countries = countriesDualRepository.findByNameContaining(searchString, languageCode);
-        if(countries.size() != expectedResultNames.length) {
-            fail("Unexpected number of countries returned - expecting " + expectedResultNames.length + " but found " + countries.size());
+        if(countries.size() != expectedCodes.length) {
+            fail("Unexpected number of countries returned - expecting " + expectedCodes.length + " but found " + countries.size());
         }
-        List<String> countryNames = Arrays.asList(expectedResultNames);
+        List<String> countryCodes = Arrays.asList(expectedCodes);
         for(CountryEntity country : countries) {
-            assertTrue(country.getName() + " was not in the expected country names", countryNames.contains(country.getName()));
+            assertTrue(country.getIso3166Alpha2Code() + " was not in the expected country codes", countryCodes.contains(country.getIso3166Alpha2Code()));
         }
     }
 

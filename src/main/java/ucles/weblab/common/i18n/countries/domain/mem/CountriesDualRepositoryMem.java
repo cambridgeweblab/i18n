@@ -30,10 +30,12 @@ import static java.util.stream.Collectors.toList;
  */
 public class CountriesDualRepositoryMem implements CountriesRawRepository, CountryRepository {
     private final Logger log = LoggerFactory.getLogger(CountriesDualRepositoryMem.class);
-    private final Function<Object, CountryEntity> jsonObjectToCountryEntity;
+    private final Supplier<CountryEntity.Builder> countryEntityBuilder;
+    private final Function<Object, CountryEntity> jsonToCountryEnglish; //jsonToTranslation(countryCode) method is available
 
     public CountriesDualRepositoryMem(Supplier<CountryEntity.Builder> countryEntityBuilder) {
-        this.jsonObjectToCountryEntity =
+        this.countryEntityBuilder = countryEntityBuilder;
+        this.jsonToCountryEnglish =
                     ((Function<Object, Map>) (o -> (Map) o)).andThen(
                             map -> countryEntityBuilder.get()
                                     .name((String) map.get("name"))
@@ -61,14 +63,14 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
         return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(where("name").eq(name))))
                 .orElse(emptyList()).stream()
                 .findFirst()
-                .map(jsonObjectToCountryEntity);
+                .map(jsonToCountryEnglish);
     }
 
     @Override
     public List<? extends CountryEntity> findAll() {
         return getReadContext().map(readContext -> (List<Object>) readContext.json())
                 .orElse(emptyList()).stream()
-                .map(jsonObjectToCountryEntity)
+                .map(jsonToCountryEnglish)
                 .collect(toList());
     }
 
@@ -85,7 +87,7 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
         return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(where("alpha2Code").eq(countryCode))))
                 .orElse(emptyList()).stream()
                 .findFirst()
-                .map(jsonObjectToCountryEntity);
+                .map(jsonToCountryEnglish);
     }
 
     @Override
@@ -95,15 +97,14 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
         if(isEnglish(languageCode)) {
             return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(where("name").regex(searchStringContains))))
                     .orElse(emptyList()).stream()
-                    .map(jsonObjectToCountryEntity)
+                    .map(jsonToCountryEnglish)
                     .collect(toList());
         } else {
-
             return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(
                         where("name").regex(searchStringContains))
                         .or(where("translations." + languageCode).regex(searchStringContains))))
                     .orElse(emptyList()).stream()
-                    .map(jsonObjectToCountryEntity)
+                    .map(jsonToCountryTranslation(languageCode))
                     .collect(toList());
         }
     }
@@ -131,5 +132,18 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
             s = s.replace("\\E", "E");
         }
         return "\\Q" + s + "\\E";
+    }
+
+    private Function<Object, CountryEntity> jsonToCountryTranslation(String languageCode) {
+        if(isEnglish(languageCode)) {
+            return jsonToCountryEnglish;
+        }
+        return ((Function<Object, Map>) (o -> (Map) o)).andThen(
+                        map -> countryEntityBuilder.get()
+                                .name((String) ((Map) map.get("translations")).get(languageCode))
+                                .iso3166Alpha2Code((String) map.get("alpha2Code"))
+                                .population(Optional.ofNullable((Number) map.get("population")).map(Number::longValue).filter(n -> n > 0L))
+                                .callingCodes(((Collection<String>) map.get("callingCodes")).stream().filter(s -> !s.isEmpty()).collect(toList()))
+                                .get());
     }
 }

@@ -35,6 +35,7 @@ public interface CountriesRawRepository {
      * and supports up to one language in addition to English.
      *
      * @param languageCode  defaults to English, will search within the country translations for the provided language code in addition to the English name
+     * @return The returned object's name will be in the given language (defaulting to English)
      */
     List<? extends CountryEntity> findByNameContaining(String countrySearchString, String languageCode);
 
