@@ -19,6 +19,8 @@ import org.springframework.security.access.expression.method.DefaultMethodSecuri
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import ucles.weblab.common.i18n.countries.config.CountriesConfig;
+import ucles.weblab.common.i18n.service.LocalisationService;
+import ucles.weblab.common.i18n.service.impl.LocalisationServiceImpl;
 import ucles.weblab.common.schema.webapi.EnumSchemaCreator;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
 import ucles.weblab.common.security.SecurityChecker;
@@ -70,18 +72,23 @@ public class AutoRefreshCountriesServiceImpl_IT {
         }
 
         @Bean
+        LocalisationService localisationService(MessageSource messageSource) {
+            return new LocalisationServiceImpl(messageSource);
+        }
+
+        @Bean
         public ResourceSchemaCreator resourceSchemaCreator(SecurityChecker securityChecker,
                                                            CrossContextConversionService crossContextConversionService,
                                                            EnumSchemaCreator enumSchemaCreator,
                                                            JsonSchemaFactory jsonSchemaFactory,
-                                                           MessageSource messageSource) {
+                                                           LocalisationService localisationService) {
 
             return new ResourceSchemaCreator(securityChecker,
                     new ObjectMapper(),
                     crossContextConversionService,
                     enumSchemaCreator,
                     jsonSchemaFactory,
-                    messageSource);
+                    localisationService);
         }
 
 

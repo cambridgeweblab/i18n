@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
@@ -44,6 +45,7 @@ import java.util.function.Supplier;
 @EnableScheduling
 @EnableAsync
 @ConditionalOnClass({ObjectMapper.class})
+@ConditionalOnProperty(name = "i18n.countries.enabled", havingValue = "true", matchIfMissing = true)
 @Import(CountriesBuilders.class)
 public class CountriesConfig {
 
