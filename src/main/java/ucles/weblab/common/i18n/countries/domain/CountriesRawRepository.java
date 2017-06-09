@@ -31,6 +31,11 @@ public interface CountriesRawRepository {
     Optional<? extends CountryEntity> findOneByAlpha2Code(String countryCode);
 
     /**
+     * Get the country by iso 2 letter country code, country name is returned in the desired language.
+     */
+    Optional<? extends CountryEntity> findOneByAlpha2Code(String countryCode, String languageCode);
+
+    /**
      * Fetches a list of countries by searching for the country name - search is case insensitive and unicode enabled,
      * and supports up to one language in addition to English.
      *

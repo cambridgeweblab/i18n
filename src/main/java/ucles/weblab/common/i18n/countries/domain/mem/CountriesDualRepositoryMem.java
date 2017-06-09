@@ -83,11 +83,17 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
 
     @Override
     public Optional<? extends CountryEntity> findOneByAlpha2Code(String countryCode) {
+        return findOneByAlpha2Code(countryCode, null);
+    }
+
+    @Override
+    public Optional<? extends CountryEntity> findOneByAlpha2Code(String countryCode, String languageCode) {
+        Function<Object, CountryEntity> mapper = isEnglish(languageCode) ? jsonToCountryEnglish : jsonToCountryTranslation(languageCode);
 
         return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(where("alpha2Code").eq(countryCode))))
                 .orElse(emptyList()).stream()
                 .findFirst()
-                .map(jsonToCountryEnglish);
+                .map(mapper);
     }
 
     @Override
