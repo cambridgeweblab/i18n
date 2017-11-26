@@ -18,14 +18,7 @@ import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
 import ucles.weblab.common.schema.webapi.SchemaMediaTypes;
 import ucles.weblab.common.xc.service.CrossContextMapping;
 
-import java.util.Collection;
-import java.util.Currency;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -87,7 +80,7 @@ public class CountriesController {
                             isoCode,
                             languages,
                             callingCodes.stream().filter(s -> !s.isEmpty()).collect(toList()),
-                            population != null && population.longValue() != 0L ? population.longValue() : null,
+                            population == null || population.longValue() == 0L ? null : population.longValue(),
                             currencies.stream().filter(s -> !s.isEmpty()).collect(toMap(Function.identity(),
                                     resourceForCurrencyCode, (a, b) -> a, LinkedHashMap::new)));
                 })
@@ -105,11 +98,9 @@ public class CountriesController {
     @CrossContextMapping(value = "urn:xc:i18n:countries:$iddPrefixes")
     @RequestMapping(value = "/$iddPrefixes", method = GET, produces = SchemaMediaTypes.APPLICATION_SCHEMA_JSON_UTF8_VALUE)
     public ResponseEntity<JsonSchema> countryCallingCodes() {
-        ConcurrentSkipListSet<String> codes = new ConcurrentSkipListSet<>();
         Stream<CountryResource> countriesWithCodes = getCountries().stream()
                 .filter(r -> !r.getCode().isEmpty())
-//                .filter(r -> codes.add(r.getCode().iterator().next())) // Distinct codes
-                .sorted((r1, r2) -> r1.getCode().iterator().next().compareTo(r2.getCode().iterator().next()));
+                .sorted(Comparator.comparing(r -> r.getCode().iterator().next()));
         final Function<CountryResource, String> valueFn = r -> r.getCode().iterator().next();
         final Optional<Function<CountryResource, String>> nameFn = Optional.of(r -> "+" + r.getCode().iterator().next());
         final Optional<Function<CountryResource, String>> descFn = Optional.of(CountryResource::getIso);

@@ -25,7 +25,7 @@ public class CountryResource extends ResourceSupport {
     public static class CurrencyResource {
         private String symbol;
 
-        protected CurrencyResource() {
+        protected CurrencyResource() { // For Jackson etc
         }
 
         public CurrencyResource(String symbol) {
@@ -38,8 +38,12 @@ public class CountryResource extends ResourceSupport {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             CurrencyResource that = (CurrencyResource) o;
             return Objects.equals(symbol, that.symbol);
         }

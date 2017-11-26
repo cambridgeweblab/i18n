@@ -54,11 +54,11 @@ public class AutoRefreshCountriesServiceImpl implements CountriesService, Schedu
         final ResponseEntity<String> response = restTemplate.getForEntity(countriesUri, String.class);
         final String body = response.getBody();
         if (response.getStatusCode() != HttpStatus.OK) {
-            throw new RuntimeException("Failed to invoke REST Countries at " + countriesUri + " - " + response.getStatusCode().toString() + "\n" + body);
+            throw new IllegalStateException("Failed to invoke REST Countries at " + countriesUri + " - " + response.getStatusCode().toString() + "\n" + body);
         }
         // Ensure it parses OK, but we don't need to keep the result.
         final List<Object> list = JsonParserFactory.getJsonParser().parseList(body);
-        logger.debug("Loaded countries - " + (list != null ? list.size() : 0) + " countries returned");
+        logger.debug("Loaded countries - " + (list == null ? 0 : list.size()) + " countries returned");
 
         countriesRawRepository.updateAll(body);
         logger.info("Finished refreshing countries data.");

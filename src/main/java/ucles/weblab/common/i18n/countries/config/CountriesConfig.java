@@ -81,7 +81,7 @@ public class CountriesConfig {
                     final String initialCountries = readAll(readable);
                     // Ensure it parses OK, but we don't need to keep the result.
                     final List<Object> list = JsonParserFactory.getJsonParser().parseList(initialCountries);
-                    logger.info("Loaded initial countries data - " + (list != null ? list.size() : 0) + " countries available.");
+                    logger.info("Loaded initial countries data - " + (list == null ? 0 : list.size()) + " countries available.");
                     repository.updateAll(initialCountries);
                 }
                 service.refreshRepository();

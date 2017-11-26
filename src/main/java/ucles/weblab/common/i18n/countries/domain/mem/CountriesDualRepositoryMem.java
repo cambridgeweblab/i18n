@@ -29,24 +29,30 @@ import static java.util.stream.Collectors.toList;
  * @since 18/05/15
  */
 public class CountriesDualRepositoryMem implements CountriesRawRepository, CountryRepository {
+    private static final String NAME = "name";
+    private static final String ALPHA_2_CODE = "alpha2Code";
+    private static final String POPULATION = "population";
+    private static final String CALLING_CODES = "callingCodes";
+    private static final String ARRAY_MEMBER = "$[?]";
+
     private final Logger log = LoggerFactory.getLogger(CountriesDualRepositoryMem.class);
     private final Supplier<CountryEntity.Builder> countryEntityBuilder;
     private final Function<Object, CountryEntity> jsonToCountryEnglish; //jsonToTranslation(countryCode) method is available
+
+    private Optional<String> countriesRawData = Optional.empty();
+    private Optional<ReadContext> jsonPathReadContext = Optional.empty();
 
     public CountriesDualRepositoryMem(Supplier<CountryEntity.Builder> countryEntityBuilder) {
         this.countryEntityBuilder = countryEntityBuilder;
         this.jsonToCountryEnglish =
                     ((Function<Object, Map>) (o -> (Map) o)).andThen(
                             map -> countryEntityBuilder.get()
-                                    .name((String) map.get("name"))
-                                    .iso3166Alpha2Code((String) map.get("alpha2Code"))
-                                    .population(Optional.ofNullable((Number) map.get("population")).map(Number::longValue).filter(n -> n > 0L))
-                                    .callingCodes(((Collection<String>) map.get("callingCodes")).stream().filter(s -> !s.isEmpty()).collect(toList()))
+                                    .name((String) map.get(NAME))
+                                    .iso3166Alpha2Code((String) map.get(ALPHA_2_CODE))
+                                    .population(Optional.ofNullable((Number) map.get(POPULATION)).map(Number::longValue).filter(n -> n > 0L))
+                                    .callingCodes(((Collection<String>) map.get(CALLING_CODES)).stream().filter(s -> !s.isEmpty()).collect(toList()))
                                     .get());
     }
-
-    private Optional<String> countriesRawData = Optional.empty();
-    private Optional<ReadContext> jsonPathReadContext = Optional.empty();
 
     @Override
     public Optional<String> findAllRaw() {
@@ -60,7 +66,7 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
 
     @Override
     public Optional<? extends CountryEntity> findOneByName(String name) {
-        return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(where("name").eq(name))))
+        return getReadContext().map(readContext -> (List<Object>) readContext.read(ARRAY_MEMBER, filter(where(NAME).eq(name))))
                 .orElse(emptyList()).stream()
                 .findFirst()
                 .map(jsonToCountryEnglish);
@@ -90,7 +96,7 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
     public Optional<? extends CountryEntity> findOneByAlpha2Code(String countryCode, String languageCode) {
         Function<Object, CountryEntity> mapper = isEnglish(languageCode) ? jsonToCountryEnglish : jsonToCountryTranslation(languageCode);
 
-        return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(where("alpha2Code").eq(countryCode))))
+        return getReadContext().map(readContext -> (List<Object>) readContext.read(ARRAY_MEMBER, filter(where(ALPHA_2_CODE).eq(countryCode))))
                 .orElse(emptyList()).stream()
                 .findFirst()
                 .map(mapper);
@@ -101,13 +107,13 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
         Pattern searchStringContains = Pattern.compile(".*" + regexSafeQuote(countrySearchString) + ".*", Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
         if(isEnglish(languageCode)) {
-            return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(where("name").regex(searchStringContains))))
+            return getReadContext().map(readContext -> (List<Object>) readContext.read(ARRAY_MEMBER, filter(where(NAME).regex(searchStringContains))))
                     .orElse(emptyList()).stream()
                     .map(jsonToCountryEnglish)
                     .collect(toList());
         } else {
-            return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter(
-                        where("name").regex(searchStringContains))
+            return getReadContext().map(readContext -> (List<Object>) readContext.read(ARRAY_MEMBER, filter(
+                        where(NAME).regex(searchStringContains))
                         .or(where("translations." + languageCode).regex(searchStringContains))))
                     .orElse(emptyList()).stream()
                     .map(jsonToCountryTranslation(languageCode))
@@ -119,25 +125,25 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
     public Optional<String> getCodeByNameAndLocale(String countryName, String languageCode) {
         /*  There is currently no english translation, so the name attribute needs to be searched if the
             language code is english, otherwise the appropriate translations are searched */
-        Filter filter = ( isEnglish(languageCode) ) ? filter(where("name").eq(countryName)) : filter(where("translations." + languageCode).eq(countryName));
+        Filter filter = isEnglish(languageCode) ? filter(where(NAME).eq(countryName)) : filter(where("translations." + languageCode).eq(countryName));
 
-        return getReadContext().map(readContext -> (List<Object>) readContext.read("$[?]", filter))
+        return getReadContext().map(readContext -> (List<Object>) readContext.read(ARRAY_MEMBER, filter))
                 .orElse(emptyList()).stream()
                 .findFirst()
-                .map( o -> ((Map<String, String>) o).get("alpha2Code").toString() );
+                .map( o -> ((Map<String, String>) o).get(ALPHA_2_CODE).toString() );
     }
 
     private static boolean isEnglish(String languageCode) {
         return languageCode == null || languageCode.equals("en");
     }
 
-    private String regexSafeQuote(String s) {
-        s = s.trim();
-        if(s.contains("\\E")) {
-            log.warn("Encountered an end quote special character in a field using regex \"" + s + "\", continuing and treating it as an 'E'");
-            s = s.replace("\\E", "E");
+    private String regexSafeQuote(final String s) {
+        String safe = s.trim();
+        if(safe.contains("\\E")) {
+            log.warn("Encountered an end quote special character in a field using regex \"" + safe + "\", continuing and treating it as an 'E'");
+            safe = safe.replace("\\E", "E");
         }
-        return "\\Q" + s + "\\E";
+        return "\\Q" + safe + "\\E";
     }
 
     private Function<Object, CountryEntity> jsonToCountryTranslation(String languageCode) {
@@ -147,9 +153,9 @@ public class CountriesDualRepositoryMem implements CountriesRawRepository, Count
         return ((Function<Object, Map>) (o -> (Map) o)).andThen(
                         map -> countryEntityBuilder.get()
                                 .name((String) ((Map) map.get("translations")).get(languageCode))
-                                .iso3166Alpha2Code((String) map.get("alpha2Code"))
-                                .population(Optional.ofNullable((Number) map.get("population")).map(Number::longValue).filter(n -> n > 0L))
-                                .callingCodes(((Collection<String>) map.get("callingCodes")).stream().filter(s -> !s.isEmpty()).collect(toList()))
+                                .iso3166Alpha2Code((String) map.get(ALPHA_2_CODE))
+                                .population(Optional.ofNullable((Number) map.get(POPULATION)).map(Number::longValue).filter(n -> n > 0L))
+                                .callingCodes(((Collection<String>) map.get(CALLING_CODES)).stream().filter(s -> !s.isEmpty()).collect(toList()))
                                 .get());
     }
 }
