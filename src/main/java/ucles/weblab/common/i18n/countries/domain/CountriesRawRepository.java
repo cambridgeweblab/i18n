@@ -16,17 +16,13 @@ import java.util.Optional;
 public interface CountriesRawRepository {
     /**
      * Find all the data.
-     *
-     * @return
      */
     Optional<String> findAllRaw();
 
     void updateAll(String rawData);
-    
+
     /**
-     * Get the country by iso 2 letter country code. 
-     * @param countryCode
-     * @return 
+     * Get the country by iso 2 letter country code.
      */
     Optional<? extends CountryEntity> findOneByAlpha2Code(String countryCode);
 

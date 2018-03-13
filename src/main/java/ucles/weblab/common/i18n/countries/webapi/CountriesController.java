@@ -7,12 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JsonParserFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ucles.weblab.common.i18n.countries.domain.CountriesRawRepository;
 import ucles.weblab.common.i18n.countries.webapi.resource.CountryResource;
 import ucles.weblab.common.i18n.countries.webapi.resource.CountryResource.CurrencyResource;
-import ucles.weblab.common.webapi.MoreMediaTypes;
 import ucles.weblab.common.webapi.exception.ResourceNotFoundException;
 import ucles.weblab.common.schema.webapi.ResourceSchemaCreator;
 import ucles.weblab.common.schema.webapi.SchemaMediaTypes;
@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 /**
@@ -51,7 +52,7 @@ public class CountriesController {
         this.schemaCreator = schemaCreator;
     }
 
-    @RequestMapping(value = "/", method = GET, produces = MoreMediaTypes.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "/", produces = APPLICATION_JSON_UTF8_VALUE)
     @CacheControl(policy = CachePolicy.PUBLIC, maxAge = 60 * 60 * 24 * 7)
     public List<CountryResource> getCountries() {
         final String rawData = countriesRawRepository.findAllRaw().orElseThrow(() -> new ResourceNotFoundException(-1));
@@ -63,7 +64,9 @@ public class CountriesController {
                     // Use this to filter out any empty codes
                     @SuppressWarnings("unchecked")
                     final Collection<String> callingCodes = (Collection<String>) map.get("callingCodes");
+                    @SuppressWarnings("unchecked")
                     final Collection<String> currencies = (Collection<String>) map.get("currencies");
+                    @SuppressWarnings("unchecked")
                     final Collection<String> languages = (Collection<String>) map.get("languages");
                     final Number population = (Number) map.get("population");
                     final String isoCode = (String) map.get("alpha2Code");
@@ -88,7 +91,7 @@ public class CountriesController {
     }
 
     @CrossContextMapping(value = "urn:xc:i18n:countries:$isoCodes")
-    @RequestMapping(value = "/$isoCodes", method = GET, produces = SchemaMediaTypes.APPLICATION_SCHEMA_JSON_UTF8_VALUE)
+    @GetMapping(value = "/$isoCodes", produces = SchemaMediaTypes.APPLICATION_SCHEMA_JSON_UTF8_VALUE)
     public ResponseEntity<JsonSchema> enumerate() {
         final JsonSchema enumSchema = schemaCreator.createEnum(getCountries(), methodOn(CountriesController.class).enumerate(),
                 CountryResource::getIso, Optional.of(CountryResource::getName));

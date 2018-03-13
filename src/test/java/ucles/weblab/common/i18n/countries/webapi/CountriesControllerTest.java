@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import ucles.weblab.common.i18n.countries.domain.CountriesRawRepository;
 import ucles.weblab.common.i18n.countries.webapi.resource.CountryResource;
 import ucles.weblab.common.i18n.countries.webapi.resource.CountryResource.CurrencyResource;
@@ -20,8 +20,7 @@ import static org.hamcrest.Matchers.emptyCollectionOf;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 /**
@@ -33,11 +32,11 @@ public class CountriesControllerTest {
     private CountriesRawRepository countriesRawRepository;
     @Mock
     private ResourceSchemaCreator schemaCreator;
-    
+
     private CountriesController countriesController;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         countriesController = new CountriesController(countriesRawRepository, schemaCreator);
         WebTestSupport.setUpRequestContext();
     }
@@ -106,7 +105,7 @@ public class CountriesControllerTest {
         assertEquals("Expected 1 country", 1, result.size());
         assertEquals("Expected name", "Heard Island and McDonald Islands", result.get(0).getName());
         assertEquals("Expected ISO code", "HM", result.get(0).getIso());
-        assertEquals("Expected population", null, result.get(0).getPopulation());
+        assertNull("Expected population", result.get(0).getPopulation());
         assertThat("Expected no dialling code", result.get(0).getCode(), emptyCollectionOf(String.class));
         assertThat("Expected currency", result.get(0).getCurrency(), hasKey("AUD"));
         assertThat("Expected languages", result.get(0).getLanguages(), contains("en"));
@@ -139,7 +138,7 @@ public class CountriesControllerTest {
         assertEquals("Expected 1 country", 1, result.size());
         assertEquals("Expected name", "Bouvet Island", result.get(0).getName());
         assertEquals("Expected ISO code", "BV", result.get(0).getIso());
-        assertEquals("Expected population", null, result.get(0).getPopulation());
+        assertNull("Expected population", result.get(0).getPopulation());
         assertThat("Expected no dialling code", result.get(0).getCode(), emptyCollectionOf(String.class));
         assertThat("Expected currency", result.get(0).getCurrency(), hasKey("NOK"));
         assertThat("Expected languages", result.get(0).getLanguages(), hasSize(0));
