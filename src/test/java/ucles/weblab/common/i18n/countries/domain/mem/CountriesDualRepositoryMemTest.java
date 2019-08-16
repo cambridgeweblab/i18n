@@ -11,11 +11,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
@@ -28,6 +26,7 @@ import static org.junit.Assume.assumeNoException;
 /**
  * @since 18/05/15
  */
+@SuppressWarnings("ConstantConditions")
 public class CountriesDualRepositoryMemTest {
     private static final String COUNTRIES_SUBSET_JSON = "countries-subset.json";
     private CountriesDualRepositoryMem countriesDualRepository = new CountriesDualRepositoryMem(new CountriesBuilders().countryEntityBuilder());
@@ -50,28 +49,29 @@ public class CountriesDualRepositoryMemTest {
         assertEquals("New Zealand", result.get().getName());
         assertEquals("NZ", result.get().getIso3166Alpha2Code());
         assertEquals((Long) 4547900L, result.get().getPopulation().get());
-        assertEquals(Arrays.asList("64"), result.get().getCallingCodes());
+        assertEquals(singletonList("64"), result.get().getCallingCodes());
     }
 
     @Test
     public void testFindAll() {
         loadCountries();
         final List<? extends CountryEntity> all = countriesDualRepository.findAll();
+        //noinspection unchecked
         assertThat("Expect all countries", all, contains(countryWithName("Australia"), countryWithName("Christmas Island"),
                 countryWithName("Cocos (Keeling) Islands"), countryWithName("New Zealand"), countryWithName("Norfolk Island")));
     }
-    
+
     @Test
-    public void findOneBy2LetterCode() throws Exception {
+    public void findOneBy2LetterCode() {
         loadCountries();
         Optional<? extends CountryEntity> result = countriesDualRepository.findOneByAlpha2Code("AU");
         assertTrue("Expect a result", result.isPresent());
         assertEquals("Australia", result.get().getName());
-        assertEquals("AU", result.get().getIso3166Alpha2Code());        
+        assertEquals("AU", result.get().getIso3166Alpha2Code());
     }
 
     @Test
-    public void testFindByNameContaining() throws Exception {
+    public void testFindByNameContaining() {
         loadCountries();
 
         confirmContainsCountries("AUS", null, "AU"); //Test ignores case
@@ -95,7 +95,7 @@ public class CountriesDualRepositoryMemTest {
     }
 
     @Test
-    public void testGetCodeByNameAndLocale() throws Exception {
+    public void testGetCodeByNameAndLocale() {
         loadCountries();
 
         //Test it works in English
